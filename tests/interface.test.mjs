@@ -7,6 +7,7 @@ test('Visual lesson, guided choices, independent recall, assistance, profiles an
  globalThis.document={querySelector:el,querySelectorAll:()=>answers,addEventListener:(name,fn)=>handlers[name]=fn,body:{classList:{toggle(){},remove(){}}},createElement:()=>({click(){}})};
  globalThis.window={scrollTo(){}};globalThis.localStorage={getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v)};globalThis.confirm=()=>true;
  globalThis.FormData=class{constructor(form){this.data=form.data||{};}get(k){return this.data[k]??null;}};
+ const realFetch=globalThis.fetch,cloudSaves=new Map();globalThis.fetch=async(url,options)=>{assert.ok(url.startsWith('https://wordraiders-sync.wordraiders.workers.dev/v1/save/MM'));const previous=cloudSaves.get(url);if(options.method==='POST'){const b=JSON.parse(options.body);if(b.baseRev!==(previous?.rev||0))return Response.json({conflict:true,...previous},{status:409});const next={data:b.data,rev:(previous?.rev||0)+1,savedAt:Date.now()};cloudSaves.set(url,next);return Response.json(next);}return Response.json(previous||{}, {status:previous?200:404});};
  const realInterval=globalThis.setInterval,realTimeout=globalThis.setTimeout;globalThis.setInterval=()=>0;globalThis.setTimeout=()=>0;
  const click=async(data)=>handlers.click({target:{closest:()=>({dataset:data})},preventDefault(){}});
  const submit=async(id,data={})=>handlers.submit({target:{id,data},preventDefault(){}});
@@ -33,6 +34,8 @@ test('Visual lesson, guided choices, independent recall, assistance, profiles an
   await click({action:'tool-tab',tab:'notes'});await submit('note-form',{question:'My question?',answer:'My answer',cue:'A useful cue'});state=JSON.parse(memory.get('mentalist-memory.v1'));assert.equal(state.profiles[0].notes[0].answer,'My answer');
   await click({page:'settings'});await submit('new-profile-form',{name:'Second learner'});state=JSON.parse(memory.get('mentalist-memory.v1'));assert.equal(state.profiles.length,2);assert.equal(state.profiles[1].history.length,0);assert.equal(state.profiles[0].history.length,3);
   await submit('import-form',{backup:{size:5000,text:async()=>JSON.stringify(state)}});state=JSON.parse(memory.get('mentalist-memory.v1'));assert.equal(state.profiles.length,4);
+  assert.match(html(),/Create my sync code/);await click({action:'sync-create'});assert.match(html(),/Show my code/);const linked=JSON.parse(memory.get('mentalist-memory.sync.v1'))[state.active];assert.ok(linked.code.startsWith('MM'));await click({action:'sync-reveal'});assert.ok(html().includes(linked.code.slice(0,4)+'-'));
+  await submit('rename-form',{name:'Synced learner'});await click({action:'sync-now'});assert.match(html(),/Progress synced/);await click({action:'sync-disconnect'});assert.match(html(),/Create my sync code/);await submit('sync-join-form',{syncCode:linked.code});state=JSON.parse(memory.get('mentalist-memory.v1'));assert.equal(state.profiles.length,5);assert.equal(state.profiles.at(-1).name,'Synced learner');assert.match(html(),/Connected/);
   for(const page of ['today','course','train','toolkit','review','progress','science','settings']){await click({page});assert.match(html(),/<main id="main"/);assert.doesNotMatch(html(),/\[object Object\]|undefined/);}
- }finally{globalThis.setInterval=realInterval;globalThis.setTimeout=realTimeout;}
+ }finally{globalThis.setInterval=realInterval;globalThis.setTimeout=realTimeout;globalThis.fetch=realFetch;}
 });

@@ -65,7 +65,13 @@ The training supports learners who find it difficult to form mental pictures. Us
 
 ## Persistence and privacy
 
-Profiles, routes, codes, results, review sets, and notes are saved to browser `localStorage` under `mentalist-memory.v1`. Profiles are not authenticated accounts and do not synchronize automatically across devices or origins. JSON export/import transfers profiles as separate copies and validates the data; CSV exports the practice log. Browser data clearing removes local progress. Keep backups private if they contain personal notes.
+Profiles, routes, codes, results, review sets, and notes are saved to browser `localStorage` under `mentalist-memory.v1`. Optional cloud sync uses the same service and revision protocol as Engineering Quest. In Profile & settings, create a private 12-character MM code on the first device and connect it on the second. Each code shares one learner; connecting adds a profile and preserves existing learners. Engineering Quest codes cannot be used as Mentalist Memory codes.
+
+The app checks linked learners about every 15 seconds while visible and idle, and on return online. It saves completed work locally first and defers incoming progress while a drill, lesson, toolkit edit, or focused input is in use. Finish a drill and press Sync now before moving devices. Offline changes remain local until a successful sync. Cross-device edits pause for an explicit choice, with both copies stored in the last recovery backup before resolution. Recovery backups can be downloaded and imported using the existing backup importer. This backup is local and only the latest recovery is retained. Unlinking keeps local progress and does not delete the cloud save or disconnect other devices.
+
+Sync links are stored separately under `mentalist-memory.sync.v1`, never included in ordinary progress exports. Anyone with the code can read and change its cloud save. Sync uploads notebook content as well as training progress; avoid sensitive notes. Saves are compressed when supported and respect the service's 400 KB request limit. Sync is not end-to-end encrypted. The shared sync backend requires no changes or new credentials.
+
+JSON export/import transfers profiles as separate, unlinked copies and validates the data; CSV exports the practice log. Browser data clearing removes local progress, sync links, and local recovery backups. Keep your sync code or exported backup somewhere safe.
 
 No personal details from the commissioning user's history are embedded in the app. Faces are original procedural illustrations, not photos or identified people. Name drills are association exercises; real-world face recognition needs separate practice. Object and code illustrations are original SVG drawings, paired with labels. Learners may use the visible art, sound, actions, or verbal associations.
 
@@ -86,7 +92,7 @@ These sources support general training principles. The lesson sequence, threshol
 npm test
 ```
 
-Seventeen passing Node tests cover curriculum/codebook integrity, exact scoring and leading zeroes, full deck uniqueness, every drill generator, delayed snapshots and timing, failed/assisted retests, mastery gates, route reservation, adaptive size suggestions, backup validation, notebook scheduling, and interface render/event flows (lessons, scoring, assistance, toolkit, profile isolation, and imports). They also cover all 72 visual lesson frames, illustration coverage, one-item study/recall and guided-choice flows, backward-compatible profiles, and exclusion of recognition scores from mastery.
+Twenty-six passing Node tests cover curriculum/codebook integrity, scoring, delayed retests, mastery, routes, backups, visual lessons, and interface event flows. Sync tests use a simulated revision-checked service to cover two devices, profile isolation, compressed payloads, offline retries, concurrent edits, requests racing edits, deferred downloads, wrong-game codes, storage failures, tab conflicts, and create/connect/disconnect UI actions. No existing learner cloud saves are used in tests.
 
 The lightweight interface test uses a DOM stub; it does not validate browser layout. `node --check` passes for all five JavaScript modules. SVG illustration contact sheets were rendered and visually inspected; ambiguous object drawings were refined. The managed preview service could not start because its sandbox could not mount `/proc` (`bwrap: Can't mount proc ... Operation not permitted`). Consequently real-browser interaction, visual layout, mobile viewport behavior, and accessibility-tree QA remain unverified. No browser was installed or alternate preview service substituted.
 
@@ -98,6 +104,7 @@ The lightweight interface test uses a DOM stub; it does not validate browser lay
 - `visuals.js`: deterministic original SVG pictures, routes, and association scenes.
 - `engine.js`: generation, scoring, mastery, scheduling, and backup validation.
 - `app.js`: views, practice state machine, profile persistence, and events.
+- `sync.js`, `sync-ui.js`: per-learner code sync, revision checks, recovery backups, and settings controls.
 - `tests/`: deterministic logic tests and interface event smoke tests.
 
 This is the standalone Mentalist Memory repository. Application files live at the repository root so GitHub Pages can publish main / (root) directly. No build step or secrets are required.
