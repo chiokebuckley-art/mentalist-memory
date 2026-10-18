@@ -16,6 +16,7 @@ test('Visual lesson, guided choices, independent recall, assistance, profiles an
  const begin=async(mode,support='typed',count=3)=>{await click({action:'setup',mode});el('#minutes').value='5';el('#count').value=String(count);el('#limit').value='0';el('#route').value=undefined;el('#response-mode').value=support;await submit('setup-form');};
  try{
   await import('../app.js');assert.match(html(),/See it happen/);
+  await click({page:'settings'});await click({action:'sync-create'});const initialSave=JSON.parse(memory.get('mentalist-memory.v1'));assert.ok(JSON.parse(memory.get('mentalist-memory.sync.v1'))[initialSave.active]);await click({action:'sync-disconnect'});
   await click({action:'lesson',id:'attention'});assert.match(html(),/Start with one thing/);assert.match(html(),/aria-label="apple"/);assert.doesNotMatch(html(),/ONE QUICK CHECK/);
   await click({action:'coach-step',index:'2'});assert.match(html(),/ONE QUICK CHECK/);assert.match(html(),/What did you notice/);
   await click({action:'coach-reveal'});assert.match(html(),/Hide again/);await click({action:'answer-lesson',index:'1'});
