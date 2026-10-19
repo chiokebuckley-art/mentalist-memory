@@ -1,4 +1,4 @@
-import {setupSync} from './sync-ui.js?v=20261018-sync2';
+import {setupSync} from './sync-ui.js?v=20261019-phone1';
 import {picture,pictureWords,hasPicture,routeScene,connectionScene,locationArt} from './visuals.js';
 import {visualLessons,coachScene,hiddenScenes} from './coach.js';
 import {chapters,sources,modes,cards,pegs,suits,ranks} from './curriculum.js';

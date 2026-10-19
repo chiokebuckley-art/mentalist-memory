@@ -32,7 +32,9 @@ export async function unpack(data){
  return new Blob(chunks).text();
 }
 export class MemorySync {
- constructor({storage,getProfile,replaceProfile,addProfile,canApply=()=>true,fetchFn=globalThis.fetch,onChange=()=>{}}){
+ // Safari requires native fetch to be called with the Window receiver. Keep the
+ // browser call inside a wrapper instead of invoking it as a MemorySync method.
+ constructor({storage,getProfile,replaceProfile,addProfile,canApply=()=>true,fetchFn=(...args)=>globalThis.fetch(...args),onChange=()=>{}}){
   Object.assign(this,{storage,getProfile,replaceProfile,addProfile,canApply,fetchFn,onChange});this.busy=false;this.conflicts=new Map();this.status=new Map();this.links={};
   try{this.rawLinks=storage.getItem(LINK_KEY);const links=JSON.parse(this.rawLinks||'{}');for(const [id,l] of Object.entries(links)){if(/^[a-zA-Z0-9_-]{1,100}$/.test(id)&&validCode(l?.code)&&Number.isInteger(l.rev)&&l.rev>=0&&typeof l.hash==='string')this.links[id]=l;}}catch{this.disabled=true;}
  }

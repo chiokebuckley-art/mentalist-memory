@@ -1,4 +1,4 @@
-import {MemorySync,formatCode,RECOVERY_KEY} from './sync.js';
+import {MemorySync,formatCode,RECOVERY_KEY} from './sync.js?v=20261019-phone1';
 import {validStore} from './engine.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function setupSync({storage,getState,commit,canApply,notify,rerender}){

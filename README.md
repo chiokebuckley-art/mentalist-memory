@@ -92,7 +92,7 @@ These sources support general training principles. The lesson sequence, threshol
 npm test
 ```
 
-Twenty-six passing Node tests cover curriculum/codebook integrity, scoring, delayed retests, mastery, routes, backups, visual lessons, and interface event flows. Sync tests use a simulated revision-checked service to cover two devices, profile isolation, compressed payloads, offline retries, concurrent edits, requests racing edits, deferred downloads, wrong-game codes, storage failures, tab conflicts, and create/connect/disconnect UI actions. No existing learner cloud saves are used in tests.
+Twenty-seven passing Node tests cover curriculum/codebook integrity, scoring, delayed retests, mastery, routes, backups, visual lessons, and interface event flows. Sync tests use a simulated revision-checked service to cover two devices, profile isolation, compressed payloads, offline retries, concurrent edits, requests racing edits, deferred downloads, wrong-game codes, storage failures, tab conflicts, create/connect/disconnect UI actions, and Safari’s native fetch receiver requirement. No existing learner cloud saves are used in tests.
 
 The lightweight interface test uses a DOM stub; it does not validate browser layout. `node --check` passes for all five JavaScript modules. SVG illustration contact sheets were rendered and visually inspected; ambiguous object drawings were refined. The managed preview service could not start because its sandbox could not mount `/proc` (`bwrap: Can't mount proc ... Operation not permitted`). Consequently real-browser interaction, visual layout, mobile viewport behavior, and accessibility-tree QA remain unverified. No browser was installed or alternate preview service substituted.
 

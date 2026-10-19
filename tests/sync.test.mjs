@@ -21,6 +21,17 @@ function device(server,name='Learner'){
  const sync=new MemorySync(options);
  return {sync,profiles,values,options,set allow(x){allow=x;},get p(){return profiles[0];}};
 }
+test('Native browser fetch keeps the Window receiver for create, pull and push',async()=>{
+ const original=globalThis.fetch,s=service(),a=device(s),b=device(s);let requests=0;
+ globalThis.fetch=function(...args){assert.equal(this,globalThis,'Safari requires the Window receiver');requests++;return s.fetch(...args);};
+ try{
+  const first=new MemorySync({...a.options,fetchFn:undefined}),second=new MemorySync({...b.options,fetchFn:undefined});
+  assert.equal(await first.create(a.p.id),true);
+  const code=first.info(a.p.id).link.code,id=await second.join(code);assert.ok(id);
+  b.profiles.at(-1).name='Phone learner';assert.equal(await second.sync(id),true);
+  assert.equal(await first.sync(a.p.id),true);assert.equal(a.p.name,'Phone learner');assert.ok(requests>=5);
+ }finally{globalThis.fetch=original;}
+});
 test('Private MM codes, typed envelopes and compressed saves round trip',async()=>{
  const code=newCode();assert.ok(validCode(code));assert.equal(normalizeCode(formatCode(code).toLowerCase()),code);assert.equal(validCode('EQABCDEFGHJK'),false);assert.equal(validCode(normalizeCode(code+'extra')),false);
  const raw=encodeProfile(newProfile());assert.equal(await unpack(await pack(raw)),raw);assert.ok(decodeProfile(raw));assert.throws(()=>decodeProfile(JSON.stringify({app:'engineering-quest',profile:newProfile()})));
